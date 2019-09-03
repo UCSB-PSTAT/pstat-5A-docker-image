@@ -1,17 +1,16 @@
-FROM jupyter/scipy-notebook:7d427e7a4dde
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+FROM jupyter/scipy-notebook
 
 LABEL maintainer="Patrick Windmiller <sysadmin@pstat.ucsb.edu>"
 
-USER ${NB_USER}
+USER $NB_UID
 
-RUN conda update -n base conda && \
-    conda update -y numpy && \
-    conda install -y quandl && \
+
+# Install spaCy, pandas, scikit-learn packages
+RUN conda install -c conda-forge spacy && \
+    conda install --quiet -y pandas && \
+    conda install --quiet -y scikit-learn && \
     conda clean -tipsy && \
     fix-permissions $CONDA_DIR && \
     fix-permissions /home/$NB_USER
-
-USER root
-  
-RUN apt-get update && \
-    apt-get install -y zip unzip && \
