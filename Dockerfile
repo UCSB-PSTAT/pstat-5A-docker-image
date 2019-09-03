@@ -1,6 +1,6 @@
 FROM jupyter/scipy-notebook:7d427e7a4dde
 
-LABEL maintainer="Sang-Yun Oh <syoh@ucsb.edu>"
+LABEL maintainer="Patrick Windmiller <sysadmin@pstat.ucsb.edu>"
 
 RUN conda update -n base conda && \
     conda install -y -c cvxgrp cvxpy cvxportfolio && \
