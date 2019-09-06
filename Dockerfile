@@ -6,6 +6,7 @@ LABEL maintainer="Patrick Windmiller <sysadmin@pstat.ucsb.edu>"
 
 USER $NB_UID
 
+RUN pip install datascience
 
 # Install spaCy, pandas, scikit-learn packages
 RUN conda install -c conda-forge spacy && \
