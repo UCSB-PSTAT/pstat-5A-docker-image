@@ -9,7 +9,7 @@ USER root
 RUN pip install datascience
 
 # Install spaCy, pandas, scikit-learn packages
-RUN conda install -c conda-forge spacy && \
+RUN conda install -c conda-forge hypothesis mock spacy && \
     conda clean -tipsy 
 
 USER $NB_UID
