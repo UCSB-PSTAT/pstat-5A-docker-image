@@ -6,7 +6,7 @@ LABEL maintainer="LSIT Systems <lsitops@lsit.ucsb.edu>"
 
 USER root
 
-RUN pip install datascience
+RUN pip install datascience pytest
 
 # Install spaCy, pandas, scikit-learn packages
 RUN conda install -c conda-forge hypothesis mock spacy && \
