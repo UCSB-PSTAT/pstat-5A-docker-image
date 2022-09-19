@@ -9,7 +9,7 @@ USER root
 RUN pip install datascience pytest
 
 # Install spaCy, pandas, scikit-learn packages
-RUN conda install -c conda-forge hypothesis mock spacy && \
-    conda clean -tipsy 
+RUN mamba install -c conda-forge hypothesis mock spacy && \
+    mamba clean --all
 
 USER $NB_UID
