@@ -19,7 +19,7 @@ pipeline {
                 }
                 stage('Test') {
                     steps {
-                        sh 'podman run -it --rm localhost/$IMAGE_NAME python -c "import numpy; import pandas; import matplotlib; import scipy; import spacy; import math; import datascience"'
+                        sh 'podman run -it --rm localhost/$IMAGE_NAME python -c "import numpy; import pandas; import matplotlib; import scipy; import spacy; import math; import datascience; import matplotlib.pyplot"'
                         sh 'podman run -it --rm localhost/$IMAGE_NAME python -m pytest --pyargs spacy'
                         sh 'podman run -d --name=$IMAGE_NAME --rm -p 8888:8888 localhost/$IMAGE_NAME start-notebook.sh --NotebookApp.token="jenkinstest"'
                         sh 'sleep 10 && curl -v http://localhost:8888/lab?token=jenkinstest 2>&1 | grep -P "HTTP\\S+\\s200\\s+[\\w\\s]+\\s*$"'
