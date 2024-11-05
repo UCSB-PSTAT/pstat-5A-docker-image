@@ -9,7 +9,10 @@ pipeline {
     stages {
         stage('Build Test Deploy') {
             agent {
-                label 'jupyter'
+                kubernetes {
+                    cloud 'rke-test'
+                    inheritFrom 'podman'
+                }
             }
             stages{
                 stage('Build') {
@@ -19,29 +22,33 @@ pipeline {
                                scmSkip(deleteBuild: true, skipPattern:'.*\\[ci skip\\].*')
                             }
                         }
-                        echo "NODE_NAME = ${env.NODE_NAME}"
-                        sh 'podman build -t $IMAGE_NAME --pull  --no-cache .'
+                        container('podman') {
+                            echo "NODE_NAME = ${env.NODE_NAME}"
+                            sh 'podman build -t $IMAGE_NAME --pull  --no-cache .'
+                        }
                      }
                     post {
                         unsuccessful {
-                            sh 'podman rmi -i localhost/$IMAGE_NAME || true'
+                            container('podman') {sh 'podman rmi -i localhost/$IMAGE_NAME || true'}
                         }
                     }
                 }
                 stage('Test') {
                     steps {
-                        sh 'podman run -it --rm localhost/$IMAGE_NAME python -c "import numpy; import otter; import pandas; import matplotlib; import scipy; import spacy; import math; import datascience; import matplotlib.pyplot"'
-                        sh 'podman run -it --rm localhost/$IMAGE_NAME python -m pytest --pyargs spacy'
-                        sh 'podman run -d --name=$IMAGE_NAME --rm -p 8888:8888 localhost/$IMAGE_NAME start-notebook.sh --NotebookApp.token="jenkinstest"'
-                        sh 'sleep 10 && curl -v http://localhost:8888/lab?token=jenkinstest 2>&1 | grep -P "HTTP\\S+\\s200\\s+[\\w\\s]+\\s*$"'
-                        sh 'curl -v http://localhost:8888/tree?token=jenkinstest 2>&1 | grep -P "HTTP\\S+\\s200\\s+[\\w\\s]+\\s*$"'
+                        container('podman') {
+                            sh 'podman run -it --rm localhost/$IMAGE_NAME python -c "import numpy; import otter; import pandas; import matplotlib; import scipy; import spacy; import math; import datascience; import matplotlib.pyplot"'
+                            sh 'podman run -it --rm localhost/$IMAGE_NAME python -m pytest --pyargs spacy'
+                            sh 'podman run -d --name=$IMAGE_NAME --rm -p 8888:8888 localhost/$IMAGE_NAME start-notebook.sh --NotebookApp.token="jenkinstest"'
+                            sh 'sleep 10 && curl -v http://localhost:8888/lab?token=jenkinstest 2>&1 | grep -P "HTTP\\S+\\s200\\s+[\\w\\s]+\\s*$"'
+                            sh 'curl -v http://localhost:8888/tree?token=jenkinstest 2>&1 | grep -P "HTTP\\S+\\s200\\s+[\\w\\s]+\\s*$"'
+                        }
                     }
                     post {
                         always {
-                            sh 'podman rm -ifv $IMAGE_NAME'
+                            container('podman') {sh 'podman rm -ifv $IMAGE_NAME'}
                         }
                         unsuccessful {
-                            sh 'podman rmi -i localhost/$IMAGE_NAME || true'
+                            container('podman') {sh 'podman rmi -i localhost/$IMAGE_NAME || true'}
                         }
                     }
                 }
@@ -51,19 +58,21 @@ pipeline {
                         DOCKER_HUB_CREDS = credentials('DockerHubToken')
                     }
                     steps {
-                        sh 'skopeo copy containers-storage:localhost/$IMAGE_NAME docker://docker.io/ucsb/$IMAGE_NAME:latest --dest-username $DOCKER_HUB_CREDS_USR --dest-password $DOCKER_HUB_CREDS_PSW'
-                        sh 'skopeo copy containers-storage:localhost/$IMAGE_NAME docker://docker.io/ucsb/$IMAGE_NAME:v$(date "+%Y%m%d") --dest-username $DOCKER_HUB_CREDS_USR --dest-password $DOCKER_HUB_CREDS_PSW'
+                        container('podman') {
+                            sh 'skopeo copy containers-storage:localhost/$IMAGE_NAME docker://docker.io/ucsb/$IMAGE_NAME:latest --dest-username $DOCKER_HUB_CREDS_USR --dest-password $DOCKER_HUB_CREDS_PSW'
+                            sh 'skopeo copy containers-storage:localhost/$IMAGE_NAME docker://docker.io/ucsb/$IMAGE_NAME:v$(date "+%Y%m%d") --dest-username $DOCKER_HUB_CREDS_USR --dest-password $DOCKER_HUB_CREDS_PSW'
+                        }
                     }
                     post {
                         always {
-                            sh 'podman rmi -i localhost/$IMAGE_NAME || true'
+                            container('podman') {sh 'podman rmi -i localhost/$IMAGE_NAME || true'}
                         }
                     }
                 }                
             }
             post {
                 always {
-                    sh 'podman rmi -i localhost/$IMAGE_NAME || true'
+                    container('podman') {sh 'podman rmi -i localhost/$IMAGE_NAME || true'}
                 }
             }
         }
