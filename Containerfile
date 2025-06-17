@@ -7,8 +7,14 @@ LABEL maintainer="LSIT Systems <lsitops@lsit.ucsb.edu>"
 USER root
 
 RUN pip install datascience \
+    ipywidgets \
+    openpyxl \
     otter-grader \
-    pytest
+    plotly \
+    pytest \
+    scikit-learn \
+    seaborn \
+    statsmodels 
 
 # Install spaCy, pandas, scikit-learn packages
 RUN mamba install -c conda-forge hypothesis mock spacy && \
