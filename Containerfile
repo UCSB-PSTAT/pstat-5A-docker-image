@@ -8,6 +8,7 @@ USER root
 
 RUN pip install datascience \
     ipywidgets \
+    ml-datasets \
     openpyxl \
     otter-grader \
     plotly \
