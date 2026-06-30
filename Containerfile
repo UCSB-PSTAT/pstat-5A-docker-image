@@ -1,6 +1,6 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
-FROM ucsb/scipy-base:latest
+FROM registry.cloud.college.ucsb.edu/ucsb/scipy-base:latest
 
 LABEL maintainer="LSIT Systems <lsitops@lsit.ucsb.edu>"
 
